@@ -400,7 +400,19 @@ In the report, add a section: `## 價格偏離分析 (Price Deviation Investigat
 
 ### Required sections (v5 streamlined — 11 sections, no redundancy):
 
-1. **現價錨定** — Stock price via WebSearch FIRST. Basic metrics (市值/股本/PB/TTM PE). Analyst targets with dates.
+**Analysis order: Graph query → WebSearch → Report writing → Graph write-back**
+
+0. **🔴 圖譜先行（Graph-First, before ANY WebSearch）** — Run graph query script to extract:
+   - Products (produces edges) → what L2/L3 does the company make?
+   - Materials (input_to edges) → what L0/L1 does it consume? What's the risk (HHI/status/controls)?
+   - Competitors (other producers of same L2/L3) → graph-verified competitive landscape
+   - Factory locations (production_sites) → geographic concentration
+   - Event connections (direct + via supply chain) → known risks/tailwinds
+   - Prior analysis (investment_analysis field) → what did we conclude last time?
+
+   **This becomes the analysis framework. WebSearch only fills gaps.**
+
+1. **現價錨定** — Stock price via WebSearch. Basic metrics. Analyst targets with dates.
 
 2. **一句話判斷** — Direct answer to "is there investment value at current price?"
 

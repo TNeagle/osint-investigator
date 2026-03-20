@@ -7,14 +7,90 @@ This file covers how to use the supply chain knowledge graph (`supply_chain_mcp/
 
 ---
 
-## Graph Pre-extraction Workflow
+## 🔴 Graph-First Analysis Protocol — 圖譜先行
 
-Before starting any investment analysis, run the graph intelligence extraction:
+**The graph is the STARTING POINT, not an afterthought.** Query the graph BEFORE doing WebSearch. The graph tells you what you already know; WebSearch fills in what's changed.
 
-1. Generate `graph_intel_{stock_id}.json` using the supply chain MCP tools
-2. This gives you pre-computed: bc (betweenness centrality), degree, customers, suppliers, competitors, upstream chain
+### Why Graph-First?
 
-**Use VENV Python** (`supply_chain_mcp/.venv/Scripts/python.exe`, NX 3.6.1), NOT system Python.
+The graph now contains 51,000+ edges including 8,700+ product/material links, 1,200+ factory locations, and 600+ logistics routes. Querying these FIRST gives you:
+- The company's full product/material chain (L0→L1→Company→L2→L3) without any WebSearch
+- Competitive landscape (all companies producing the same L2/L3 product)
+- Material concentration risk (L0/L1 node's HHI and supplier_count)
+- Geographic exposure (production_sites + routes + chokepoints)
+- Known events already connected to the company's supply chain
+
+**Only AFTER the graph query should you WebSearch for: current stock price, latest financials, new events not yet in graph, and analyst estimates.**
+
+### Graph-First Workflow (run BEFORE any WebSearch)
+
+```python
+# Use VENV Python: supply_chain_mcp/.venv/Scripts/python.exe
+
+# Step 1: What does this company MAKE?
+produces_edges = [e for e in edges if e['source'] == stock_id
+                  and any(r['type'] == 'produces' for r in e['relations'])]
+# → Lists all L2/L3 products with revenue_pct
+
+# Step 2: What does this company CONSUME?
+input_edges = [e for e in edges if e['target'] == stock_id
+               and any(r['type'] == 'input_to' for r in e['relations'])]
+# → Lists all L0/L1 materials used
+
+# Step 3: For each product, WHO ELSE makes it? (competitive landscape)
+for prod_edge in produces_edges:
+    product_node = prod_edge['target']
+    competitors = [e['source'] for e in edges if e['target'] == product_node
+                   and any(r['type'] == 'produces' for r in e['relations'])
+                   and e['source'] != stock_id]
+    # → Competitors from graph, not guessing
+
+# Step 4: For each material, what's the RISK?
+for mat_edge in input_edges:
+    mat_node = node_map[mat_edge['source']]
+    hhi = mat_node.get('hhi')  # concentration index
+    status = mat_node.get('current_status')  # shortage/adequate/abundant
+    export_ctrl = mat_node.get('export_control')
+    # → Material risk directly from graph
+
+# Step 5: Where are the FACTORIES?
+sites = node_map[stock_id].get('production_sites', [])
+# → Geographic concentration risk
+
+# Step 6: What EVENTS affect this company?
+# Direct events + events on L0/L1 materials + events on T1 partners
+# (see Deep Graph Analysis Protocol below)
+
+# Step 7: What does PRIOR ANALYSIS say?
+prior = node_map[stock_id].get('investment_analysis', {})
+# → Previous valuation, pricing power score, verdict
+```
+
+**After this graph query, you know:**
+- What products/materials define this company
+- Who competes with them (graph-verified, not assumed)
+- Which materials are at risk (HHI, export controls, shortage status)
+- Where production is concentrated
+- Which events propagate through the supply chain
+- What prior analysis concluded
+
+**THEN do WebSearch for:** stock price, latest monthly revenue, Q-latest earnings, new events since `last_updated`, analyst targets.
+
+### What to WebSearch (only what graph CANNOT provide)
+
+| Data | Graph has it? | WebSearch needed? |
+|------|--------------|-------------------|
+| Product/material chain | ✅ L0-L3 edges | ❌ No |
+| Competitors | ✅ produces edges | ❌ No (unless new entrant) |
+| Material risk (HHI, controls) | ✅ L0/L1 nodes | 🟡 Only if >3 months old |
+| Factory locations | ✅ production_sites | ❌ No (unless new factory) |
+| Event connections | ✅ event nodes | 🟡 Only for NEW events |
+| Prior analysis/valuation | ✅ investment_analysis | ❌ No |
+| **Stock price** | ❌ | ✅ Always |
+| **Latest financials** | ❌ | ✅ Always |
+| **Analyst estimates** | ❌ | ✅ Always |
+| **New events since last_updated** | ❌ | ✅ Always |
+| **Insider activity** | ❌ | ✅ Always |
 
 ---
 
@@ -361,28 +437,84 @@ This directly links geopolitical events to specific supply relationships with qu
 
 ## Post-analysis: Write Back to Graph (MANDATORY)
 
-After completing the analysis and writing the report, **write the structured findings into the supply chain graph node**:
+Every analysis generates intelligence the graph doesn't have. **Write it back so future analyses start from a higher baseline.**
 
+### What to write back
+
+**1. Company node — investment_analysis (always)**
 ```python
 node["investment_analysis"] = {
-    "analysis_date": "YYYY-MM-DD",
+    "date": "YYYY-MM-DD",
+    "version": "v5-segmented",
     "current_price": X,
-    "role_transformed": true/false/"partial",
-    "pricing_power": {"green": N, "yellow": N, "red": N},
-    "structural_valuation": {"bull": X, "base": X, "bear": X, "weighted_midpoint": X},
-    "price_position": "below_bear / bear_to_base / base / base_to_bull / above_bull",
-    "verdict": "one-line summary"
-}
-node["geopolitical_assessment"] = {
-    "overall_classification": "direct_beneficiary / indirect_beneficiary / neutral / indirect_victim / direct_victim",
-    "china_exposure": "high / medium / low",
-    "overseas_production": true/false,
-    "key_risk": "one-line",
-    "key_opportunity": "one-line"
+    "verdict": "one-line summary",
+    "pricing_power": "6G1Y",
+    "role_score": "5/5",
+    # Segmented valuation
+    "segments": [
+        {"name": "NOR Flash", "eps": 3.0, "pe": 20, "value": 60},
+        {"name": "DDR4 DRAM", "eps": 6.0, "pe": 10, "value": 60}
+    ],
+    "bull": X, "base": X, "bear": X,
+    "new_entry": "summary recommendation",
+    "current_holder": "summary recommendation"
 }
 ```
 
-This ensures the graph accumulates intelligence over time, and future analyses can build on prior findings.
+**2. Company node — geopolitical_assessment (always)**
+```python
+node["geopolitical_assessment"] = {
+    "date": "YYYY-MM-DD",
+    "risk_level": "低(受益)/中性/高(受害)",
+    "china_revenue_pct": X,
+    "key_risk": "one-line",
+    "key_benefit": "one-line"
+}
+```
+
+**3. New edges discovered during analysis**
+| Discovery | Edge type | Example |
+|-----------|-----------|---------|
+| New supplier relationship | supply | WebSearch confirms Bosch buys NOR from Winbond |
+| New customer relationship | supply | Found QCT using Winbond NOR for server BMC |
+| New competitor | competes_with | HieFo enters CW laser market |
+| De-anonymized customer | upgrade confidence | 甲客戶 = likely SK Hynix |
+| Strategic shareholder | investor | Phison holds 12% of Apacer |
+
+**4. L0/L1 node updates**
+When the analysis reveals material supply status has changed:
+```python
+l0_node["current_status"] = "critical_shortage"  # was "adequate"
+l0_node["export_control"] = "CN licensing since 2025/02"
+l0_node["last_updated"] = "2026-03-21"
+```
+
+**5. Event node updates**
+When Fresh Event Scan reveals event status has changed:
+```python
+event_node["status"] = "de-escalating"  # was "active"
+event_node["last_updated"] = "2026-03-21"
+```
+Or create new event node if a new event is discovered.
+
+**6. Product revenue_pct updates**
+When financial data gives more precise segment breakdown:
+```python
+# Update the produces edge relation
+relation["revenue_pct"] = 35.2  # was None or old value
+```
+
+**7. production_sites updates**
+When annual report or news reveals new factory:
+```python
+node["production_sites"].append({"location": "US-Arizona", "pct": 5, "products": ["4nm"]})
+```
+
+### Write-back timing
+
+- **During analysis**: Mark new discoveries in a scratch list as you find them
+- **After report**: Batch write all discoveries to graph in one script execution
+- **Rule**: Never finish an analysis without writing back. The next analyst (including future you) should not have to re-discover what you already found.
 
 ---
 
