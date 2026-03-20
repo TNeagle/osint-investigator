@@ -33,6 +33,91 @@ Graph data provides **structure**; web search provides **dynamics**. Neither alo
 
 ---
 
+## Product & Material Layer — 產品/原材料層級體系
+
+The graph contains not only companies and events, but also **products, materials, and resources** as independent nodes. This enables tracing risk from raw material origins all the way to end products.
+
+### Four-Layer Hierarchy
+
+| Layer | node_type | Definition | Risk Character | Examples |
+|-------|-----------|-----------|---------------|----------|
+| **L0 Resource** | `L0_resource` | Extracted from earth/atmosphere | Country monopoly + geopolitics | Silicon, indium, gallium, iron ore, crude oil, cotton, neon |
+| **L1 Material** | `L1_material` | Refined/synthesized, used as manufacturing input | Refining concentration + export controls | Silicon wafer, photoresist, CCL, polyester fiber, steel billet |
+| **L2 Device** | `L2_device` | Manufactured discrete item | Technology monopoly + capacity cycle | DDR4 DRAM, NOR Flash, ABF substrate, steel coil, fabric |
+| **L3 Module** | `L3_module` | Assembled system-level product | Demand cycle + inventory dynamics | Memory module, optical transceiver, server, garment |
+
+**Classification rule:** An item belongs to the layer where it is CONSUMED (not assembled) by the next layer. Silicon wafer is L1 (consumed by fab process), not L2. DRAM die is L2 (assembled into DIMM), not L1.
+
+### Node Schema
+
+```json
+{
+  "id": "DEV_DDR4_DRAM",
+  "name": "DDR4 DRAM Die",
+  "type": "L2_device",
+  "category": "memory_ic",
+  "industry_chain": "semiconductor",
+  "supplier_count": 5,
+  "active_supplier_count": 2,
+  "hhi": 4500,
+  "normal_supply": "adequate",
+  "current_status": "critical_shortage",
+  "strategic_classification": "critical",
+  "last_updated": "2026-03-20"
+}
+```
+
+Key fields:
+- `supplier_count` / `active_supplier_count`: How many can make it vs how many are currently making it
+- `hhi`: Herfindahl-Hirschman Index (>2500 = highly concentrated)
+- `current_status`: `abundant | adequate | tight | shortage | critical_shortage` — this is DYNAMIC, changes with market conditions
+- `strategic_classification`: `commodity | important | strategic | critical` — can upgrade when shortage hits (e.g., DDR4 was commodity, now critical)
+
+### Category Reference (cross-industry)
+
+**L0 Resource categories:** `semiconductor_metal`, `noble_gas`, `metal_ore`, `energy`, `petrochemical_feedstock`, `mineral`, `agricultural`, `forestry`, `rare_earth`
+
+**L1 Material categories:** `wafer_substrate`, `chemical_process`, `pcb_material`, `steel_intermediate`, `petrochemical`, `polymer`, `textile_material`, `cement_material`, `food_intermediate`, `packaging_material`
+
+**L2 Device categories:** `memory_ic`, `logic_ic`, `optoelectronic`, `substrate_board`, `passive`, `steel_product`, `plastic_product`, `textile_product`, `glass`, `paper`
+
+**L3 Module categories:** `memory_module`, `optical_module`, `server_system`, `network_equipment`, `consumer_electronics`, `automotive`, `construction`, `food_product`, `textile_finished`
+
+### Edge Types for Product/Material Layer
+
+```
+L0 --[raw_material_for]--> L1    (resource feeds material production)
+L1 --[input_to]--> Company       (material is consumed by company's manufacturing)
+Company --[produces]--> L2       (company manufactures this device/intermediate)
+L2 --[component_of]--> L3       (device is assembled into module)
+Company --[produces]--> L3       (company assembles this module/product)
+```
+
+### When to Build Product/Material Nodes
+
+- **During investigation**: When you discover a supply chain bottleneck (single source, monopoly, shortage), create the product/material node
+- **Priority**: Only build nodes that have analytical value — items with single source, export controls, concentration risk, or active shortage
+- **Don't over-build**: No need to create nodes for commodity items with 10+ suppliers and no concentration risk
+
+### Querying the Product/Material Layer
+
+```python
+# "What companies are affected if DDR4 supply is disrupted?"
+ddr4_node = 'DEV_DDR4_DRAM'
+users = [t for s, t, d in edges if s == ddr4_node and d['type'] == 'input_to']
+
+# "What raw materials does TSMC ultimately depend on?"
+# Trace: TSMC <- L1 materials <- L0 resources
+tsmc_materials = [s for s, t, d in edges if t == '2330' and d['type'] == 'input_to']
+for mat in tsmc_materials:
+    resources = [s for s, t, d in edges if t == mat and d['type'] == 'raw_material_for']
+
+# "Which items are currently in critical_shortage?"
+critical = [n for n in nodes if n.get('current_status') == 'critical_shortage']
+```
+
+---
+
 ## 🔴 Deep Graph Analysis Protocol (MANDATORY)
 
 The graph_intel JSON is a starting point, NOT the analysis. You MUST perform deep traversal:

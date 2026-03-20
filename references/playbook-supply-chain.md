@@ -4,6 +4,8 @@
 
 **Source priority:** Start with customs/trade databases and company filings. Import/export records, shipping data, and regulatory filings are primary evidence of actual supply chain relationships. News articles about "partnerships" are announcements — verify them in trade data before citing.
 
+**Product/Material layer:** The graph uses a 4-layer hierarchy (L0 Resource → L1 Material → L2 Device → L3 Module) to represent products and raw materials as independent nodes. See `playbook-investment-graph.md` → "Product & Material Layer" for the full schema. When tracing chains, create product/material nodes for items that are bottlenecks, monopolized, or under export control.
+
 ---
 
 ## The Chain-Tracing Method
