@@ -113,14 +113,13 @@ Example:
 
 ---
 
-## Step 3: Use the supply chain graph for geographic exposure
+## Step 3: Use the supply chain graph for geographic + logistics exposure
 
 Query the knowledge graph (`supply_chain_mcp/data/supply_chain.json`) to identify:
 
 1. **Upstream vulnerability**: Trace Tier 2/3 suppliers — are any in geopolitically sensitive regions?
    - China-sourced materials (rare earth 93%, tungsten 80%, polysilicon 80%)
    - Single-country dependencies (Japan for specialty chemicals, Korea for memory)
-   - Shipping route dependencies (Strait of Hormuz, Suez Canal, Taiwan Strait)
 
 2. **Customer concentration by geography**: Use `revenue_by_geography` and `china_revenue_pct` fields
    - China revenue >30% = high geopolitical risk
@@ -129,6 +128,20 @@ Query the knowledge graph (`supply_chain_mcp/data/supply_chain.json`) to identif
 
 3. **Cross-reference with graph edges**: Which of the company's confirmed customers/suppliers are themselves exposed to geopolitical events?
    - Example: If Company A supplies NVIDIA, and NVIDIA faces China export restrictions, Company A is indirectly affected
+
+4. **🔴 Logistics risk (shipping route exposure)**
+
+   See `playbook-investment-graph.md` → Logistics Risk Layer for full schema.
+
+   **Do NOT assume all factories are in Taiwan.** Check `production_sites` on the company node. Then for each key supply edge:
+   - Identify the actual origin → destination (which factory, not just "Taiwan")
+   - Determine transport mode (air = low route risk; sea = check chokepoints)
+   - Flag edges that cross known chokepoints (Taiwan Strait, Red Sea, East China Sea, South China Sea, Malacca)
+
+   **When evaluating a chokepoint event** (e.g., Red Sea disruption):
+   - Query all supply edges with that chokepoint in `routes.chokepoints`
+   - For each match: is the product air-freightable as alternative? If yes, impact is cost increase not disruption. If no (bulk chemicals, large wafer shipments), impact is potential supply halt.
+   - Companies with overseas factories may have DIFFERENT risk profiles for the same chokepoint — e.g., 南電 Kunshan factory does NOT depend on Taiwan Strait for Japan raw materials (ships via East China Sea to Shanghai directly)
 
 ---
 

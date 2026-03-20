@@ -172,6 +172,108 @@ for u, v, d in G.in_edges(stock_id, data=True):
 
 ---
 
+## Logistics Risk Layer — 物流風險層
+
+Supply chain risk isn't just about who makes what — it's about **whether it can physically get there**. A factory in Japan is useless to a fab in Taiwan if the shipping route is blocked.
+
+### Why this matters
+- Red Sea disruption (Houthi attacks) → European chemical shipments delayed
+- Taiwan Strait tension → ALL Taiwan imports/exports at risk
+- China export licensing (indium/germanium) → delays even without a ban
+- Factories aren't always in Taiwan — 南電 42% in Kunshan, 力成 in Malaysia, etc.
+
+### Schema: Production Sites on Company Nodes
+
+```json
+{
+  "id": "8046",
+  "name": "南電",
+  "production_sites": [
+    {"location": "TW-桃園", "pct": 58, "products": ["ABF載板"]},
+    {"location": "CN-昆山", "pct": 42, "products": ["ABF載板"]}
+  ]
+}
+```
+
+**Do NOT assume all production is in Taiwan.** Check the annual report for factory locations. Key fields:
+- `location`: Country code + city (e.g., "TW-高雄", "CN-昆山", "MY-Penang")
+- `pct`: Percentage of total capacity at this site
+- `products`: What is made there
+
+### Schema: Logistics on Supply Edges
+
+```json
+{
+  "source": "Ajinomoto",
+  "target": "8046",
+  "relations": [{
+    "product": "ABF Film",
+    "routes": [
+      {
+        "from": "JP-川崎",
+        "to": "TW-桃園",
+        "mode": "air|sea|land",
+        "chokepoints": ["East China Sea", "Taiwan Strait"],
+        "alternative": "air freight viable",
+        "route_risk": "medium"
+      },
+      {
+        "from": "JP-川崎",
+        "to": "CN-昆山",
+        "mode": "sea",
+        "chokepoints": ["East China Sea"],
+        "alternative": "land via Korea-China ferry",
+        "route_risk": "low"
+      }
+    ]
+  }]
+}
+```
+
+**Same supply edge can have MULTIPLE routes** to different factory sites, with different risk profiles.
+
+### Key Chokepoints to Track
+
+| Chokepoint | Affects | Current Risk | Event Node |
+|-----------|---------|-------------|------------|
+| **Taiwan Strait** | All TW imports/exports | 🟡 persistent tension | EVT_TAIWAN_STRAIT |
+| **Red Sea / Suez** | EU chemicals → TW; TW exports → EU | 🔴 Houthi attacks ongoing | EVT_RED_SEA |
+| **Malacca Strait** | ME petrochemicals → TW/CN; SE Asia packaging return | 🟢 stable | — |
+| **East China Sea** | JP raw materials → TW/CN (wafers, substrates, gases) | 🟡 CN-JP tensions | — |
+| **South China Sea** | CN raw materials → TW (indium, germanium); TW → CN customers | 🟡 territorial disputes | — |
+
+### Transport Mode Risk
+
+| Mode | Risk Profile | Typical Cargo |
+|------|-------------|---------------|
+| **Air freight** | Low route risk (avoids sea chokepoints), but expensive | High-value: InP wafers, ASML parts, IC samples |
+| **Sea freight** | Exposed to chokepoints, 2-6 week transit | Bulk: chemicals, silicon wafers (large qty), finished modules |
+| **Land (cross-border)** | Low chokepoint risk but customs/regulatory delays | CN↔TW not applicable; CN↔VN, CN↔KR possible |
+
+**Rule of thumb:** If primary_mode = "air", sea chokepoint risk is low. Only flag sea-route chokepoints for edges where mode = "sea".
+
+### When to Build Logistics Data
+
+- **During investigation**: When analyzing a company, check its annual report for factory locations. Add `production_sites` to the node.
+- **During Tier 1 supply edge review**: For key supply relationships (especially raw materials, chemicals, substrates), infer the shipping route from origin country → factory location. Add `routes` to the edge.
+- **Priority**: Focus on edges where the product is heavy/bulky (chemicals, wafers) AND the route crosses a known chokepoint. High-value/low-volume items (IC designs, licensing) can be skipped.
+
+### Integration with Event Impact Assessment
+
+When evaluating a chokepoint event (e.g., EVT_RED_SEA), query all edges with that chokepoint in their `routes.chokepoints` array:
+
+```python
+for e in edges:
+    for r in e.get('relations', []):
+        for route in r.get('routes', []):
+            if 'Red Sea' in route.get('chokepoints', []):
+                print(f"{e['source']} → {e['target']}: {route['route_risk']}")
+```
+
+This directly links geopolitical events to specific supply relationships with quantifiable exposure.
+
+---
+
 ## Post-analysis: Write Back to Graph (MANDATORY)
 
 After completing the analysis and writing the report, **write the structured findings into the supply chain graph node**:
