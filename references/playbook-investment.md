@@ -157,130 +157,140 @@ When analyzing 3+ companies in the same sector, ALWAYS produce a comparison tabl
 
 ## 🔴 Unified Valuation Funnel — 統一估值漏斗
 
-All analysis (Q1 role, Q2 pricing power, Q3 profit conversion, events, risks) MUST flow into ONE formula:
-
-```
-公允價值 = 事件調整後EPS × 風險調整後PE
-```
-
-No section exists in isolation. Every finding must ultimately adjust either EPS or PE.
+All analysis (Q1 role, Q2 pricing power, Q3 profit conversion, events, risks) MUST flow into ONE valuation. No section exists in isolation.
 
 ### Step 0: Current Price Anchor (MANDATORY FIRST STEP)
 
 **Before ANY analysis, fetch the current stock price via WebSearch.**
 
-```
-Current price: [XXX] TWD (date: YYYY-MM-DD)
-52-week range: [low] - [high]
-```
-
 Tag every cited analyst estimate with date and stock price at that time. Discard if stock moved >30% since publication.
 
-### Step 1: Base EPS (from Q3 Profit Conversion Analysis)
+### Step 1: Segmented EPS (from Q3 Profit Conversion Analysis)
 
-Derive the BASE EPS from structural analysis of margins, utilization, contract mix — NOT from analyst consensus:
+🔴 **CRITICAL: Use segmented (分部) estimation when product lines have different demand natures.**
 
-| Scenario | Q1 Role | Q2 Pricing Power | Q3 Profit Conversion | Resulting EPS |
-|----------|---------|-------------------|----------------------|---------------|
-| **Bull** | All signals confirmed | 6-7/7 green | Max leverage | [highest credible] |
-| **Base** | Partial or confirmed | 4-5/7 green | Normal conversion | [consensus-like] |
-| **Bear** | Unchanged / cycle peaks | 2-3/7 green | Margin compression | [trough] |
+If a company has multiple product lines with different cycle characteristics (e.g., structural NOR Flash + cyclical DDR4 + stable Logic IC), estimate EPS **per segment**, not as a single total. This prevents high-PE segments from inflating the valuation of cyclical segments.
+
+| Segment | Revenue % | 2026E EPS Contribution | Demand Nature |
+|---------|-----------|----------------------|---------------|
+| [Segment A] | XX% | X.X | structural / cyclical / stable |
+| [Segment B] | XX% | X.X | structural / cyclical / stable |
+| **Total** | 100% | **X.X** | |
+
+For **single-product companies**, a single EPS estimate is fine. The segmented approach is MANDATORY when:
+- Two or more segments have fundamentally different demand natures (structural vs cyclical)
+- One segment's PE should be >2x different from another's
+- One segment is the profit driver but another provides the valuation floor
 
 ### Step 2: Event-Adjusted EPS
 
-Each event from §7 (supply chain + event matrix) MUST be quantified as EPS impact × probability:
+Each event from §6 (supply chain + event matrix) MUST be quantified as EPS impact × probability.
+
+🔴 **EVENT DE-DUPLICATION RULE**: Multiple events that share the same root cause must be counted ONCE, not separately. Use the root cause as the event, and list the others as **supporting evidence**.
+
+Example of WRONG approach:
+- Samsung exits DDR4: +1.0 EPS
+- SK Hynix exits DDR4: +1.0 EPS
+- HBM crowds out DDR4: +1.0 EPS
+- Micron acquires PSMC: +0.5 EPS
+- → Total: +3.5 EPS ← INFLATED (all are the same story: DDR4 supply shrinking)
+
+Example of CORRECT approach:
+- **DDR4 structural shortage** (evidence: Samsung exit + SK exit + CXMT exit + HBM crowding + Micron/PSMC): +3.0 EPS, 85% probability → weighted +2.55
+- → Confidence level: HIGH (5 independent evidence sources confirm same conclusion)
 
 ```
-Event-adjusted EPS = Base EPS + Σ(EPS_impact_i × probability_i)
+Event-adjusted EPS = Base EPS + Σ(de-duplicated events × probability)
 ```
 
-| Event | EPS Impact | Probability | Weighted |
-|-------|-----------|-------------|----------|
-| [Event 1] | +X.X | XX% | +X.XX |
-| [Event 2] | -X.X | XX% | -X.XX |
-| **Total adjustment** | | | **±X.XX** |
+### Step 3: Segmented Valuation (PE per segment)
 
-**Rules:**
-- Every 🟢高 event must have an EPS impact estimate
-- Every 🔴高/中 event must have an EPS impact estimate
-- 🟡中性 and 低 events can be omitted (de minimis)
-- Probabilities across ALL events need not sum to 100% — they are independent
+🔴 **Each segment gets its OWN PE based on its demand nature and the company's pricing power in that segment.**
 
-### Step 3: Q1 Role → PE Regime (Valuation League)
+**PE Regime Table (per segment):**
 
-The role assessment determines WHICH PE league the company plays in. This is the single biggest valuation driver.
+| Demand Nature | PE Range | When to use |
+|--------------|----------|-------------|
+| **Structural monopoly** (AI/automotive/irreplaceable) | 18-25x | Segment has 3+ years of structural demand growth + oligopoly position |
+| **Structural growth** (expanding TAM, not yet monopoly) | 14-20x | Growing market, company has moat but faces competition |
+| **Cyclical boom** (shortage-driven, will normalize) | 8-12x | Current super-cycle, but demand/pricing will revert to mean |
+| **Stable/mature** | 12-16x | Predictable, low-growth, steady margin |
+| **Pure commodity cycle** | 6-10x | No moat, fully exposed to spot pricing |
 
-| Q1 Score | Demand Nature | Regime Name | PE Range | Examples |
-|----------|--------------|-------------|----------|----------|
-| **5/5 + structural demand** | AI/automotive/irreplaceable | **Growth Monopoly** | 25-35x | 台積電, 聯亞 |
-| **5/5 + cyclical demand** | Shortage-driven but will normalize | **Transformed Cyclical** | 14-22x | 華邦電, 欣興 |
-| **3-4/5 partial** | Mixed old/new | **Blended** | 10-18x | 宇瞻, 宜鼎 |
-| **0-2/5 unchanged** | Pure cycle play | **Pure Cyclical** | 6-12x | 青雲, 十銓 |
+**Pricing power (Q2) adjusts the position within each segment's PE range:**
 
-**Critical:** If role is 5/5 transformed, historical PE ranges are INVALID. Use new-regime PE only.
+| Pricing Power | Percentile within range |
+|--------------|----------------------|
+| 7G | 90th |
+| 6G1Y | 75th |
+| 5G2Y | 50th |
+| 4G3Y | 25th |
+| ≤3G or 🔴 | 10th |
 
-### Step 4: Q2 Pricing Power → PE Position Within Regime
-
-Pricing power determines WHERE in the PE range the company sits:
-
-| Pricing Power | Percentile | Formula |
-|--------------|-----------|---------|
-| 7G (full monopoly) | 90th | PE = bottom + (top-bottom) × 0.90 |
-| 6G1Y | 75th | PE = bottom + (top-bottom) × 0.75 |
-| 5G2Y | 50th | PE = bottom + (top-bottom) × 0.50 |
-| 4G3Y | 25th | PE = bottom + (top-bottom) × 0.25 |
-| ≤3G or any 🔴 | 10th | PE = bottom + (top-bottom) × 0.10 |
-
+**Segment valuation:**
 ```
-Structural PE = Regime_bottom + (Regime_top - Regime_bottom) × Percentile
+Segment_value = Segment_EPS × Segment_PE
+Total_fair_value = Σ(Segment_values) × Risk_discount
 ```
 
-### Step 5: Risk Discount → PE Adjustment
+For **single-segment companies**, this simplifies to the original formula:
+```
+Fair Value = Total EPS × Single PE × Risk_discount
+```
 
-Risk factors from the analysis apply multiplicative PE discounts:
+### Step 4: Risk Discount → Applies to TOTAL, not per-segment
 
-| Risk Factor | Condition | PE Multiplier |
-|------------|-----------|---------------|
+| Risk Factor | Condition | Multiplier |
+|------------|-----------|------------|
 | **Geopolitical** | China revenue >40% | ×0.85 |
 | | China revenue 20-40% | ×0.92 |
 | | China revenue <20% | ×1.00 |
 | **Valuation extreme** | PB > historical all-time high | ×0.88 |
 | | PB in historical range | ×1.00 |
-| **Governance** | Succession risk / low Glassdoor | ×0.95 |
+| **Governance** | Succession risk / no successor named | ×0.95 |
 | **Data uncertainty** | Analyst EPS spread >2x | ×0.93 |
-| **Cycle position** | Late cycle (>60% of typical duration) | ×0.92 |
-| | Mid cycle | ×1.00 |
+| **Cycle position** | Late cycle (>70% of typical duration) | ×0.88 |
+| | Mid-late cycle (50-70%) | ×0.92 |
+| | Early-mid cycle | ×1.00 |
 
 ```
-Risk-adjusted PE = Structural PE × Π(risk_multipliers)
+Risk_discount = Π(applicable multipliers)
+Final = Σ(Segment_values) × Risk_discount
 ```
 
-### Step 6: Final Valuation
+### Step 5: Scenario Table
 
-```
-Fair Value = Event-adjusted EPS × Risk-adjusted PE
+| Scenario | Segment A | Segment B | Segment C | Subtotal | Risk Discount | **Final** |
+|----------|-----------|-----------|-----------|----------|---------------|-----------|
+| **Bull** | EPS×PE | EPS×PE | EPS×PE | XXX | ×0.90 | **XXX** |
+| **Base** | EPS×PE | EPS×PE | EPS×PE | XXX | ×0.88 | **XXX** |
+| **Bear** | EPS×PE | EPS×PE | EPS×PE | XXX | ×0.85 | **XXX** |
 
-Optimistic = Event-adjusted EPS × Structural PE × 0.80  (mild discount)
-Fair       = Event-adjusted EPS × Risk-adjusted PE
-Conservative = Event-adjusted EPS × Regime_bottom PE × Π(risk) × 0.90
-```
+**Weighted fair value = Bull×25% + Base×50% + Bear×25%**
+
+### Step 6: Cross-Validation (MANDATORY)
+
+After computing the segmented funnel, cross-check with:
+- **PB法**: Current PB vs historical PB range
+- **隱含預期反推**: Current price ÷ weighted-average PE = implied EPS → is this achievable?
+- **法人目標價**: Does the funnel align with analyst consensus? If >20% different, explain why.
 
 ### Step 7: Position Assessment
 
 ```
-Current price vs. Fair Value:
-  >20% below Fair   → Undervalued, attractive entry
-  ±10% of Fair      → Fairly valued
-  10-30% above Fair → Priced for optimism, wait for pullback
-  >30% above Fair   → Overvalued / speculative
+Current price vs. Weighted Fair Value:
+  >20% below → Undervalued, attractive entry
+  ±10%       → Fairly valued
+  10-30% above → Priced for optimism, wait
+  >30% above → Overvalued / speculative
 ```
 
-### Cross-Validation (MANDATORY)
+### Common Pitfalls to Avoid
 
-After computing the funnel value, cross-check with:
-- **PB法**: Current PB vs historical PB range → does PB support the PE-derived price?
-- **隱含預期反推**: Fair Value ÷ Structural PE = Implied EPS → is this EPS achievable?
-- **If cross-checks disagree with funnel by >20%, note the discrepancy and explain why.**
+1. **Double-counting same-source events** — Samsung exit + SK exit + HBM crowding are ONE story, not three
+2. **Applying high-PE segment's multiple to cyclical segment's EPS** — NOR Flash (20x) should NOT multiply DDR4's earnings
+3. **Ignoring cycle position** — A stock at 10x forward PE looks cheap, but if EPS is at cyclical peak and about to halve, it's actually 20x normalized PE
+4. **Confusing revenue weight with profit weight** — A segment may be 35% of revenue but 60% of profit; use EPS contribution, not revenue share
 
 ---
 
@@ -407,11 +417,13 @@ In the report, add a section: `## 價格偏離分析 (Price Deviation Investigat
 
 6. **🔴 供應鏈與事件情報 → 事件調整EPS** — Graph traversal + event matrix. Each event quantified as `EPS impact × probability`. Output: Event-adjusted EPS.
 
-7. **🔴 統一估值漏斗** — THE core section. Combines ALL prior analysis into one formula:
+7. **🔴 統一估值漏斗（分部制）** — THE core section. For multi-segment companies:
    ```
-   公允價值 = 事件調整後EPS × 風險調整後PE
+   公允價值 = Σ(各產品線EPS × 各自PE) × 風險折價
    ```
-   Must show full calculation chain. Cross-validate with PB法 + 隱含預期反推.
+   For single-segment companies: `公允價值 = EPS × PE × 風險折價`
+   Must show: segmented EPS table, per-segment PE with justification, risk discount chain, scenario table (Bull/Base/Bear), cross-validation (PB法+隱含預期+法人目標價).
+   - 🔴 **事件去重**：同源事件只算一次，其餘列為證據強度
    - 🔴 **假設前提清單（黃旗）**：3-5 preconditions for Base Case.
 
 8. **未來發展途徑** — 3 scenarios with triggers. Must tie to funnel scenarios.
