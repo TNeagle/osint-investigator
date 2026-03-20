@@ -358,10 +358,19 @@ In the report, add a section: `## 價格偏離分析 (Price Deviation Investigat
 
    **The two recommendations can be DIFFERENT.** Example: "New entry: not recommended at current price (above Base)" + "Current holders: continue holding with stop-loss at Base level" — because holders have lower cost basis and different risk calculus.
 
-8. **Price Deviation Investigation** — MANDATORY if price >50% above Bull or >30% below Bear.
-9. **Geopolitical & Event Impact** — See `playbook-investment-events.md`. First query event nodes from graph, then run Fresh Event Scan via WebSearch. Build impact matrix. Classify beneficiary/victim.
-10. **Future Development Path** — 3 scenarios with timeline, triggers, branch points. Must incorporate geopolitical scenarios from section 9.
-11. **Supply chain graph findings** — See `playbook-investment-graph.md`. Key relationships, concentration risks, Tier 2/3 geographic exposure.
+8. **🔴 Deep Graph Intelligence** — See `playbook-investment-graph.md`. This is NOT just reading graph_intel JSON. MANDATORY steps:
+   - Filter noise nodes (OCR artifacts like "營收季減", "員工")
+   - Traverse Tier 1-2 supply chain in BOTH directions (upstream + downstream)
+   - Cross-reference ALL event nodes against the company AND its Tier 1-2 partners
+   - Classify supply chain structure pattern (末端通路商/兩端集中中間壟斷/策略股東加分/瓶頸壟斷型)
+   - Note asymmetric event impacts when comparing multiple companies
+9. **🔴 Event Impact Matrix** — See `playbook-investment-events.md`. MANDATORY steps:
+   - Query graph event nodes connected to company (direct + indirect via supply chain)
+   - Run Fresh Event Scan via WebSearch (12+ searches across categories)
+   - Build Event Impact Matrix with: event, category, impact direction (🟢/🔴/🟡), magnitude (高/中/低), timeframe, transmission path
+   - Provide Event Net Assessment (count of positive vs negative, biggest upside/downside, asymmetries)
+10. **Future Development Path** — 3 scenarios with timeline, triggers, branch points. Must incorporate event scenarios from section 9.
+11. **Price Deviation Investigation** — MANDATORY if price >50% above Bull or >30% below Bear.
 12. **Bull vs. Bear** — Both sides with the key debate identified. Must include a geopolitical bear scenario if China revenue >20% or Tier 3 materials >50% from single sensitive country.
 13. **Monitoring framework** — Support Factor Dashboard (min 6 factors, must include at least 1 geopolitical factor with green/yellow/red)
 14. **Disclaimer** — Mandatory

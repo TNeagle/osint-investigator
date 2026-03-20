@@ -85,10 +85,31 @@ For the company under investigation, map EACH event to its specific supply chain
 
 **Template: Event Impact Matrix**
 
-| Event | Upstream impact | Downstream impact | Company-specific exposure | Severity | Timeline |
-|-------|----------------|-------------------|--------------------------|----------|----------|
-| [Event 1] | [Which suppliers/materials are affected?] | [Which customers are affected?] | [% of revenue/cost at risk] | green/yellow/red | [Immediate/6mo/12mo+] |
-| [Event 2] | ... | ... | ... | ... | ... |
+| Event | Category | Impact Direction | Magnitude | Timeframe | Transmission Path |
+|-------|----------|-----------------|-----------|-----------|-------------------|
+| [Event] | geopolitical/tech_shift/... | 🟢受益/🔴受害/🟡中性 | 高/中/低 | 即時/Q2-Q3/H2/2027+ | 直接 or 經[公司]→[機制] |
+
+**Impact assessment rules:**
+- **高(High)**: Event changes >15% of revenue, margins, or valuation. Examples: export control on 55% China revenue, memory price +90% QoQ
+- **中(Medium)**: Event changes 5-15%. Examples: tariff rate changes, competitor capacity shift
+- **低(Low)**: Event changes <5%. Examples: currency fluctuation, peripheral supply chain disruption
+
+**Timeframe categories:**
+- **即時(Immediate)**: Already priced in or actively affecting operations
+- **Q2-Q3 2026**: Will materialize within 3-6 months
+- **H2 2026**: Second half of year
+- **2027+**: Long-term structural change
+
+### 🔴 Event Net Assessment (MANDATORY)
+
+After building the matrix, provide a **net assessment** summarizing:
+1. How many high/medium/low events are positive vs. negative
+2. What is the single biggest upside event and single biggest downside event
+3. Whether the event environment overall supports or undermines the investment thesis
+4. Any **asymmetric events** — where the same event affects the company differently than its competitors
+
+Example:
+> **事件淨評估：強正面（4個高度受益事件）。核心風險為Samsung擴產+YMTC NAND放量在H2可能緩解供需。**
 
 ---
 

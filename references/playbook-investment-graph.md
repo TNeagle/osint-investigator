@@ -33,6 +33,75 @@ Graph data provides **structure**; web search provides **dynamics**. Neither alo
 
 ---
 
+## 🔴 Deep Graph Analysis Protocol (MANDATORY)
+
+The graph_intel JSON is a starting point, NOT the analysis. You MUST perform deep traversal:
+
+### Step 1: Noise Filtering
+
+Graph data contains noise nodes from OCR/extraction artifacts (e.g., "營收季減", "員工", "進货净额", "季增至", "的占比約為"). **Before any analysis, filter these out:**
+
+```python
+NOISE_PATTERNS = ['營收', '員工', '公司', '季增', '季減', '占比', '進货', '進貨', '年成長', '英語課']
+def is_noise(node_name):
+    return any(p in str(node_name) for p in NOISE_PATTERNS) or len(str(node_name)) < 2
+```
+
+### Step 2: Tier 2-3 Supply Chain Traversal
+
+Do NOT stop at Tier 1. Trace at least 2 layers in both directions:
+
+```
+Target Company
+  ├── Tier 1 Suppliers (direct)
+  │     ├── Tier 2 Suppliers (suppliers' suppliers)
+  │     └── Tier 2 Events (events affecting T1 suppliers)
+  ├── Tier 1 Customers (direct)
+  │     ├── Tier 2 Customers (customers' customers)
+  │     └── Tier 2 Events (events affecting T1 customers)
+  └── Direct Events (events → target company)
+```
+
+**Why this matters:** A company with no direct event exposure may be heavily affected through its supply chain. Example: 聯亞(3081) has no direct memory cycle exposure, but its customer 聯鈞(3450) connects to TSMC(2330) and ultimately to NVIDIA — revealing 聯亞's position in the NVIDIA silicon photonics ecosystem.
+
+### Step 3: Event Cross-Referencing
+
+For EACH event node in the graph (type="event"):
+1. Check if the event directly connects to the target company
+2. Check if the event connects to ANY Tier 1-2 supply chain partner
+3. For indirect connections, assess the **transmission mechanism** — how does the event propagate through the supply chain to affect the target?
+
+**Output format for report:**
+
+| Event | Category | Impact | Transmission Path |
+|-------|----------|--------|-------------------|
+| [Direct events] | | 🟢/🔴/🟡 受益/受害/中性-高/中/低 | Direct connection |
+| [Indirect events] | | 🟢/🔴/🟡 | Via [T1 partner] → [mechanism] |
+
+### Step 4: Structural Pattern Recognition
+
+After traversal, classify the company's supply chain structure:
+
+| Pattern | Description | Investment Implication |
+|---------|-------------|----------------------|
+| **末端通路商** | Low bc, few customers, distributor role | No structural moat, pure cycle play |
+| **兩端集中、中間壟斷** | Concentrated suppliers AND customers, but monopoly in middle | Strong pricing power but high concentration risk |
+| **策略股東加分** | Major industry players as shareholders | Preferential access + strategic alignment |
+| **分散平衡型** | Many suppliers, many customers, moderate bc | Stable but no pricing power premium |
+| **瓶頸壟斷型** | High bc + high margin + few alternatives | Strongest investment position |
+
+### Step 5: Comparative Event Impact
+
+When analyzing multiple companies, the SAME event often affects them DIFFERENTLY based on their supply chain role:
+
+Example: Samsung DDR5 expansion
+- **Distributor** (青雲): 受害 — supply easing reduces Micron's pricing premium
+- **Module maker** (宇瞻): 受益 — more DDR5 supply eases procurement constraints
+
+**Always note these asymmetries in the report.** They reveal which companies are structurally advantaged vs. disadvantaged within the same industry.
+
+---
+
 ## Betweenness Centrality (BC) Interpretation Guide
 
 When using graph betweenness centrality, distinguish two types:
