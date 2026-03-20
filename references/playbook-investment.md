@@ -155,77 +155,132 @@ When analyzing 3+ companies in the same sector, ALWAYS produce a comparison tabl
 
 ---
 
-## Structural Valuation Range — 結構性估值區間
+## 🔴 Unified Valuation Funnel — 統一估值漏斗
 
-While static target prices are unreliable for cyclical stocks, investors need a price reference. The solution is a **Structural Valuation Range** — derived from the Three Questions analysis, not from mechanical PE application.
+All analysis (Q1 role, Q2 pricing power, Q3 profit conversion, events, risks) MUST flow into ONE formula:
+
+```
+公允價值 = 事件調整後EPS × 風險調整後PE
+```
+
+No section exists in isolation. Every finding must ultimately adjust either EPS or PE.
 
 ### Step 0: Current Price Anchor (MANDATORY FIRST STEP)
 
-**Before ANY analysis, fetch the current stock price via WebSearch.** Every subsequent assessment is relative to this anchor.
+**Before ANY analysis, fetch the current stock price via WebSearch.**
 
 ```
 Current price: [XXX] TWD (date: YYYY-MM-DD)
 52-week range: [low] - [high]
-Price position: [near low / mid-range / near high / above 52w high]
 ```
 
-Tag every cited analyst estimate with: (estimate date, stock price at that date). **Discard any estimate where stock has moved >30% since publication.**
+Tag every cited analyst estimate with date and stock price at that time. Discard if stock moved >30% since publication.
 
-### Step 1: Derive EPS Range from Structural Analysis (not from analyst consensus)
+### Step 1: Base EPS (from Q3 Profit Conversion Analysis)
 
-Use the Three Questions to bound the EPS range:
+Derive the BASE EPS from structural analysis of margins, utilization, contract mix — NOT from analyst consensus:
 
 | Scenario | Q1 Role | Q2 Pricing Power | Q3 Profit Conversion | Resulting EPS |
 |----------|---------|-------------------|----------------------|---------------|
-| **Bull** | Role transformed + all green lights | 6-7/7 green | High leverage, favorable mix | [highest credible EPS] |
-| **Base** | Role partially changed | 4-5/7 green | Normal conversion | [consensus-like EPS] |
-| **Bear** | Role unchanged / cycle peaks | 2-3/7 green or red appearing | Margin compression | [trough EPS] |
+| **Bull** | All signals confirmed | 6-7/7 green | Max leverage | [highest credible] |
+| **Base** | Partial or confirmed | 4-5/7 green | Normal conversion | [consensus-like] |
+| **Bear** | Unchanged / cycle peaks | 2-3/7 green | Margin compression | [trough] |
 
-The EPS range comes from **what pricing power and profit conversion can structurally support**, not from analyst spreadsheets.
+### Step 2: Event-Adjusted EPS
 
-### Step 2: Determine Appropriate Multiple Range
-
-The multiple is determined by the Q1 role assessment:
-
-| Q1 Result | Multiple Source | Example |
-|-----------|----------------|---------|
-| **Role transformed** (3+ signals) | Comparable companies in NEW role, NOT historical | If company became AI infrastructure bottleneck, compare to other AI infra stocks, not to its own 2022 PE |
-| **Role partially changed** | Blend of historical and new-role comparables | Weight 50/50 |
-| **Role unchanged** | Historical cycle range is valid | Use past cycle PE band |
-
-### Step 3: Calculate Structural Valuation Range
+Each event from §7 (supply chain + event matrix) MUST be quantified as EPS impact × probability:
 
 ```
-Bull range:  Bull EPS x New-role upper multiple = [price]
-Base range:  Base EPS x Blended multiple = [price]
-Bear range:  Bear EPS x Historical trough multiple = [price]
-
-Weighted midpoint: Bull x 25% + Base x 50% + Bear x 25% = [price]
+Event-adjusted EPS = Base EPS + Σ(EPS_impact_i × probability_i)
 ```
 
-### Step 4: Position Assessment
+| Event | EPS Impact | Probability | Weighted |
+|-------|-----------|-------------|----------|
+| [Event 1] | +X.X | XX% | +X.XX |
+| [Event 2] | -X.X | XX% | -X.XX |
+| **Total adjustment** | | | **±X.XX** |
+
+**Rules:**
+- Every 🟢高 event must have an EPS impact estimate
+- Every 🔴高/中 event must have an EPS impact estimate
+- 🟡中性 and 低 events can be omitted (de minimis)
+- Probabilities across ALL events need not sum to 100% — they are independent
+
+### Step 3: Q1 Role → PE Regime (Valuation League)
+
+The role assessment determines WHICH PE league the company plays in. This is the single biggest valuation driver.
+
+| Q1 Score | Demand Nature | Regime Name | PE Range | Examples |
+|----------|--------------|-------------|----------|----------|
+| **5/5 + structural demand** | AI/automotive/irreplaceable | **Growth Monopoly** | 25-35x | 台積電, 聯亞 |
+| **5/5 + cyclical demand** | Shortage-driven but will normalize | **Transformed Cyclical** | 14-22x | 華邦電, 欣興 |
+| **3-4/5 partial** | Mixed old/new | **Blended** | 10-18x | 宇瞻, 宜鼎 |
+| **0-2/5 unchanged** | Pure cycle play | **Pure Cyclical** | 6-12x | 青雲, 十銓 |
+
+**Critical:** If role is 5/5 transformed, historical PE ranges are INVALID. Use new-regime PE only.
+
+### Step 4: Q2 Pricing Power → PE Position Within Regime
+
+Pricing power determines WHERE in the PE range the company sits:
+
+| Pricing Power | Percentile | Formula |
+|--------------|-----------|---------|
+| 7G (full monopoly) | 90th | PE = bottom + (top-bottom) × 0.90 |
+| 6G1Y | 75th | PE = bottom + (top-bottom) × 0.75 |
+| 5G2Y | 50th | PE = bottom + (top-bottom) × 0.50 |
+| 4G3Y | 25th | PE = bottom + (top-bottom) × 0.25 |
+| ≤3G or any 🔴 | 10th | PE = bottom + (top-bottom) × 0.10 |
 
 ```
-Current price vs. range:
-  Below Bear range     -> Deeply undervalued (rare — check if something is broken)
-  Bear to Base         -> Attractive entry zone
-  Base to Bull         -> Fairly valued, hold if owned
-  Above Bull           -> Overvalued / requires Bull case to be fully correct
-  Way above Bull       -> Speculative / momentum only — not supported by structural analysis
+Structural PE = Regime_bottom + (Regime_top - Regime_bottom) × Percentile
 ```
 
-### Step 5: Dynamic Adjustment Rules
+### Step 5: Risk Discount → PE Adjustment
 
-The range is NOT static. Adjust when monitoring dashboard factors change:
+Risk factors from the analysis apply multiplicative PE discounts:
 
-| Dashboard Change | Range Adjustment |
-|-----------------|-----------------|
-| Factor turns green to red | Shift entire range DOWN by removing that factor's contribution |
-| New catalyst confirmed | Shift Bull case UP |
-| Competitor enters market | Compress range (lower Bull, raise Bear) |
-| Role transformation confirmed by new data | Discard historical Bear floor, use new-role floor |
+| Risk Factor | Condition | PE Multiplier |
+|------------|-----------|---------------|
+| **Geopolitical** | China revenue >40% | ×0.85 |
+| | China revenue 20-40% | ×0.92 |
+| | China revenue <20% | ×1.00 |
+| **Valuation extreme** | PB > historical all-time high | ×0.88 |
+| | PB in historical range | ×1.00 |
+| **Governance** | Succession risk / low Glassdoor | ×0.95 |
+| **Data uncertainty** | Analyst EPS spread >2x | ×0.93 |
+| **Cycle position** | Late cycle (>60% of typical duration) | ×0.92 |
+| | Mid cycle | ×1.00 |
 
-**The valuation range is a LIVING output tied to the monitoring dashboard, not a one-time calculation.**
+```
+Risk-adjusted PE = Structural PE × Π(risk_multipliers)
+```
+
+### Step 6: Final Valuation
+
+```
+Fair Value = Event-adjusted EPS × Risk-adjusted PE
+
+Optimistic = Event-adjusted EPS × Structural PE × 0.80  (mild discount)
+Fair       = Event-adjusted EPS × Risk-adjusted PE
+Conservative = Event-adjusted EPS × Regime_bottom PE × Π(risk) × 0.90
+```
+
+### Step 7: Position Assessment
+
+```
+Current price vs. Fair Value:
+  >20% below Fair   → Undervalued, attractive entry
+  ±10% of Fair      → Fairly valued
+  10-30% above Fair → Priced for optimism, wait for pullback
+  >30% above Fair   → Overvalued / speculative
+```
+
+### Cross-Validation (MANDATORY)
+
+After computing the funnel value, cross-check with:
+- **PB法**: Current PB vs historical PB range → does PB support the PE-derived price?
+- **隱含預期反推**: Fair Value ÷ Structural PE = Implied EPS → is this EPS achievable?
+- **If cross-checks disagree with funnel by >20%, note the discrepancy and explain why.**
 
 ---
 
@@ -333,47 +388,57 @@ In the report, add a section: `## 價格偏離分析 (Price Deviation Investigat
 
 ## Report Output Standards
 
-### Required sections (investment analysis):
+### Required sections (v5 streamlined — 11 sections, no redundancy):
 
-1. **Current price anchor** — Stock price fetched via WebSearch BEFORE any analysis (mandatory first step)
-2. **One-line verdict** — Direct answer to "is there investment value at current price?"
-3. **Industry role assessment (Q1)** — Has it changed? Evidence. 3+ signals = role transformed.
-4. **Pricing power dashboard (Q2)** — Factor-by-factor with green/yellow/red
-5. **Profit conversion analysis (Q3)** — Operating leverage, contract mix, margin trajectory
-6. **Structural Valuation Range** — Bull/Base/Bear with EPS derivation from Q1-Q3, NOT from PE x consensus
-7. **Current price position + Dual-Track Recommendation** — Where does current price sit in the range? Provide TWO separate recommendations:
+1. **現價錨定** — Stock price via WebSearch FIRST. Basic metrics (市值/股本/PB/TTM PE). Analyst targets with dates.
 
-   **A. 新入場建議（New Entry）**— For investors who do NOT currently hold this stock:
-   - Is there sufficient safety margin to enter now?
-   - If yes: suggested entry zone (price range), position sizing suggestion
-   - If no: what price level to wait for, or what catalyst to confirm before entering
-   - Risk/reward ratio at current price (upside to Bull % vs downside to Bear %)
+2. **一句話判斷** — Direct answer to "is there investment value at current price?"
 
-   **B. 已持有建議（Current Holders）**— For investors who ALREADY hold this stock:
-   - Hold / Add / Reduce / Take Profit / Exit?
-   - Stop-loss level (specific price)
-   - Add-more trigger (specific price or event)
-   - Reduce trigger (specific price or event)
-   - Key monitoring points that would change the recommendation
+3. **角色評估（Q1）→ PE聯賽** — 5-signal test. Score determines valuation regime:
+   - 5/5+結構 → Growth Monopoly (25-35x)
+   - 5/5+週期 → Transformed Cyclical (14-22x)
+   - 3-4/5 → Blended (10-18x)
+   - 0-2/5 → Pure Cyclical (6-12x)
 
-   **The two recommendations can be DIFFERENT.** Example: "New entry: not recommended at current price (above Base)" + "Current holders: continue holding with stop-loss at Base level" — because holders have lower cost basis and different risk calculus.
+4. **定價權（Q2）→ PE定位 + 風險EPS敏感度** — 7-factor 🟢/🟡/🔴 determines percentile within PE regime. PLUS:
+   - 🔴 **EPS敏感度表（MANDATORY）**：`| 風險因子 | EPS影響 | 可控性 | 觸發條件 |`
 
-8. **🔴 Deep Graph Intelligence** — See `playbook-investment-graph.md`. This is NOT just reading graph_intel JSON. MANDATORY steps:
-   - Filter noise nodes (OCR artifacts like "營收季減", "員工")
-   - Traverse Tier 1-2 supply chain in BOTH directions (upstream + downstream)
-   - Cross-reference ALL event nodes against the company AND its Tier 1-2 partners
-   - Classify supply chain structure pattern (末端通路商/兩端集中中間壟斷/策略股東加分/瓶頸壟斷型)
-   - Note asymmetric event impacts when comparing multiple companies
-9. **🔴 Event Impact Matrix** — See `playbook-investment-events.md`. MANDATORY steps:
-   - Query graph event nodes connected to company (direct + indirect via supply chain)
-   - Run Fresh Event Scan via WebSearch (12+ searches across categories)
-   - Build Event Impact Matrix with: event, category, impact direction (🟢/🔴/🟡), magnitude (高/中/低), timeframe, transmission path
-   - Provide Event Net Assessment (count of positive vs negative, biggest upside/downside, asymmetries)
-10. **Future Development Path** — 3 scenarios with timeline, triggers, branch points. Must incorporate event scenarios from section 9.
-11. **Price Deviation Investigation** — MANDATORY if price >50% above Bull or >30% below Bear.
-12. **Bull vs. Bear** — Both sides with the key debate identified. Must include a geopolitical bear scenario if China revenue >20% or Tier 3 materials >50% from single sensitive country.
-13. **Monitoring framework** — Support Factor Dashboard (min 6 factors, must include at least 1 geopolitical factor with green/yellow/red)
-14. **Disclaimer** — Mandatory
+5. **財務數據 + 利潤轉換（Q3）→ Base EPS** — Revenue, margins, EPS. Output: Bull/Base/Bear EPS.
+
+6. **🔴 供應鏈與事件情報 → 事件調整EPS** — Graph traversal + event matrix. Each event quantified as `EPS impact × probability`. Output: Event-adjusted EPS.
+
+7. **🔴 統一估值漏斗** — THE core section. Combines ALL prior analysis into one formula:
+   ```
+   公允價值 = 事件調整後EPS × 風險調整後PE
+   ```
+   Must show full calculation chain. Cross-validate with PB法 + 隱含預期反推.
+   - 🔴 **假設前提清單（黃旗）**：3-5 preconditions for Base Case.
+
+8. **未來發展途徑** — 3 scenarios with triggers. Must tie to funnel scenarios.
+
+9. **多輪洞察（僅新發現）** — ONLY insights NOT already stated in §3-§7. Skip if nothing new.
+
+10. **雙軌建議 + 退場條件** — TWO separate recommendations:
+
+    **A. 新入場建議（New Entry）**:
+    | 項目 | 內容 |
+    | 建議 | [進場/等回調/不建議] |
+    | 進場區間 | [XX-YY元] |
+    | 安全邊際 | [現價 vs Base %] |
+    | 風險報酬比 | [上檔+X% / 下檔-Y%] |
+    | 等待條件 | [若不建議，等什麼] |
+
+    **B. 已持有建議（Current Holders）**:
+    | 項目 | 內容 |
+    | 建議 | [續抱/減碼/停利/出場] |
+    | 停損價 | [XX元（理由）] |
+    | 加碼/減碼觸發 | [條件] |
+    | 退場條件 | [論點失效信號] |
+    | 關鍵監控 | [1-2個最重要指標] |
+
+    **The two can be DIFFERENT.** Holders have cost basis advantage.
+
+11. **來源列表** — Simple list with (一次/二次) tags. No separate audit table needed.
 
 ### What NOT to include:
 
