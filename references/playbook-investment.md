@@ -428,6 +428,7 @@ In the report, add a section: `## 價格偏離分析 (Price Deviation Investigat
 5. **財務數據 + 利潤轉換（Q3）→ Base EPS** — Revenue, margins, EPS. Output: Bull/Base/Bear EPS.
 
 6. **🔴 供應鏈與事件情報 → 事件調整EPS** — Graph traversal + event matrix. Each event quantified as `EPS impact × probability`. Output: Event-adjusted EPS.
+   - **物流風險判斷（Logistics check）**：對每個事件，檢查是否影響該公司的進料或出貨路線（query routes on edges）。若有事件命中咽喉點 → 說明影響路徑和備援方案。若無 → 簡述「當前事件未影響該公司物流路線」即可。不需要展開完整路線表，只在有實際衝擊時才詳述。
 
 7. **🔴 統一估值漏斗（分部制）** — THE core section. For multi-segment companies:
    ```
